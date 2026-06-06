@@ -553,6 +553,7 @@ export default function App() {
   const [corrType, setCorrType] = useState("pearson");
   const [activeSection, setActiveSection] = useState("Overview");
   const [csvText, setCsvText] = useState("");
+  const [showHelp, setShowHelp] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -849,9 +850,17 @@ export default function App() {
             <div className="flex items-center gap-3">
               <button
                 onClick={handleExport}
+                title="Export the current dataset as CSV"
                 className="rounded-2xl bg-white px-4 py-2 text-sm font-semibold shadow-sm"
               >
                 Export CSV
+              </button>
+              <button
+                onClick={() => setShowHelp(true)}
+                title="Open quick help about the dashboard"
+                className="rounded-2xl bg-white px-4 py-2 text-sm font-semibold shadow-sm"
+              >
+                Help
               </button>
             </div>
           </header>
@@ -1242,6 +1251,32 @@ export default function App() {
             </section>
           )}
         </main>
+        {showHelp && (
+          <div className="fixed inset-0 z-50 flex items-start justify-center p-6">
+            <div className="absolute inset-0 bg-black/40" onClick={() => setShowHelp(false)} />
+            <div className="relative z-10 max-w-2xl w-full bg-white rounded-2xl p-6 shadow-lg">
+              <div className="flex items-start justify-between">
+                <h2 className="text-lg font-semibold">Quick Help — What this dashboard shows</h2>
+                <button onClick={() => setShowHelp(false)} className="text-sm text-slate-500">Close</button>
+              </div>
+              <div className="mt-4 text-sm text-slate-600 space-y-3">
+                <p>This dashboard analyzes a Google Play Store CSV. Place <strong>googleplaystore.csv</strong> in the <strong>public/</strong> folder to load real data.</p>
+                <p><strong>Main sections</strong> — Overview, Distributions, Correlation, Regression, Outliers, Segmentation, Hypothesis, A/B, Composite. Click items in the left menu to switch sections.</p>
+                <p><strong>Common terms</strong>:</p>
+                <ul className="list-disc ml-5">
+                  <li><strong>App</strong>: App name.</li>
+                  <li><strong>Category</strong>: App category (e.g., GAME, SOCIAL).</li>
+                  <li><strong>Rating</strong>: Average rating (1–5 scale).</li>
+                  <li><strong>Reviews</strong>: Number of reviews (numeric).</li>
+                  <li><strong>Installs</strong>: Number of installs (numeric).</li>
+                  <li><strong>Type</strong>: Free or Paid.</li>
+                  <li><strong>Content Rating</strong>: Age target (Everyone, Teen, etc.).</li>
+                </ul>
+                <p>Tips: Use <em>Export CSV</em> to download the currently loaded data. If values look missing, check the CSV headers match the expected column names.</p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
