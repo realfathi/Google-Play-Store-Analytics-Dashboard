@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #f7f8fb;
+  --card: #ffffff;
+  --soft: #f1f3f9;
+  --text: #20263d;
+  --muted: #7a8499;
+  --accent: #ff9f43;
+  --accent-strong: #ff7a00;
+  --accent-2: #6c5ce7;
+  --green: #2ecc71;
+  --blue: #3b82f6;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Sora", system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.font-display {
+  font-family: "Space Grotesk", "Sora", sans-serif;
+}
+
+.page-shell {
+  background:
+    radial-gradient(circle at 5% 5%, rgba(255, 159, 67, 0.18), transparent 40%),
+    radial-gradient(circle at 95% 10%, rgba(108, 92, 231, 0.12), transparent 45%),
+    radial-gradient(circle at 60% 90%, rgba(59, 130, 246, 0.12), transparent 45%);
+}
