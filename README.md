@@ -2,6 +2,22 @@
 
 An interactive data visualization and analytics dashboard built with React, Vite, Tailwind CSS, and Recharts. This application processes and visualizes the Google Play Store dataset to extract meaningful insights about app ratings, reviews, installations, and categories.
 
+## Screenshots
+
+<div align="center">
+  <img src="assests/screencapture-localhost-5173-2026-07-01-16_56_40.png" width="32%" alt="Dashboard Overview" />
+  <img src="assests/screencapture-localhost-5173-2026-07-01-16_56_53.png" width="32%" alt="Distributions" />
+  <img src="assests/screencapture-localhost-5173-2026-07-01-16_57_12.png" width="32%" alt="Analytics" />
+  <br/>
+  <img src="assests/screencapture-localhost-5173-2026-07-01-16_57_23.png" width="32%" alt="Scatter Plots" />
+  <img src="assests/screencapture-localhost-5173-2026-07-01-16_57_32.png" width="32%" alt="Insights" />
+  <img src="assests/screencapture-localhost-5173-2026-07-01-16_57_38.png" width="32%" alt="Outliers" />
+  <br/>
+  <img src="assests/screencapture-localhost-5173-2026-07-01-16_57_44.png" width="32%" alt="Segments" />
+  <img src="assests/screencapture-localhost-5173-2026-07-01-16_57_54.png" width="32%" alt="Testing" />
+  <img src="assests/screencapture-localhost-5173-2026-07-01-16_58_02.png" width="32%" alt="Performance Heatmap" />
+</div>
+
 ## Features
 
 - **Overview**: High-level metrics and KPIs of the app ecosystem.
@@ -34,6 +50,12 @@ An interactive data visualization and analytics dashboard built with React, Vite
 ├── tailwind.config.js       # Tailwind CSS configuration
 └── vite.config.js           # Vite bundle configuration
 ```
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed on your machine:
+- [Node.js](https://nodejs.org/) (v16.0 or higher recommended)
+- [npm](https://www.npmjs.com/) (usually installed automatically with Node.js)
 
 ## Getting Started
 

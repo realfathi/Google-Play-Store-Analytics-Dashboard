@@ -9,6 +9,7 @@ import {
   Database,
   FlaskConical,
   Gauge,
+  Info,
   LineChart as LineIcon,
   ListChecks,
   RefreshCw,
@@ -476,9 +477,9 @@ function formatNumber(value) {
   return Number(value).toFixed(2);
 }
 
-function Card({ title, icon: Icon, children, right }) {
+function Card({ title, icon: Icon, children, right, info }) {
   return (
-    <div className="rounded-3xl bg-white shadow-[0_18px_40px_rgba(31,41,55,0.08)] p-5">
+    <div className="rounded-3xl bg-white shadow-[0_18px_40px_rgba(31,41,55,0.08)] p-5 relative group/card">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
           {Icon && (
@@ -487,6 +488,15 @@ function Card({ title, icon: Icon, children, right }) {
             </span>
           )}
           <span>{title}</span>
+          {info && (
+            <div className="relative group/tooltip flex items-center ml-1">
+              <Info size={14} className="text-slate-400 hover:text-slate-600 cursor-help transition-colors" />
+              <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover/tooltip:block w-56 p-2.5 bg-slate-800 text-white text-xs leading-relaxed rounded-xl shadow-xl z-20 whitespace-normal font-normal text-center">
+                {info}
+                <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-slate-800"></div>
+              </div>
+            </div>
+          )}
         </div>
         {right}
       </div>
@@ -869,12 +879,12 @@ export default function App() {
             <>
               <section className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
                 {[
-                  { label: "Apps Analyzed", value: data.length, icon: Database, color: "text-orange-500" },
-                  { label: "Avg Rating", value: mean(rating).toFixed(2), icon: Star, color: "text-indigo-500" },
-                  { label: "Median Reviews", value: formatNumber(median(reviews)), icon: ListChecks, color: "text-blue-500" },
-                  { label: "Total Installs", value: formatNumber(installs.reduce((s, v) => s + v, 0)), icon: TrendingUp, color: "text-emerald-500" },
+                  { label: "Apps Analyzed", value: data.length, icon: Database, color: "text-orange-500", info: "Total number of apps with complete rating, reviews, and installs data." },
+                  { label: "Avg Rating", value: mean(rating).toFixed(2), icon: Star, color: "text-indigo-500", info: "The average rating of all analyzed apps." },
+                  { label: "Median Reviews", value: formatNumber(median(reviews)), icon: ListChecks, color: "text-blue-500", info: "The median number of user reviews across the dataset." },
+                  { label: "Total Installs", value: formatNumber(installs.reduce((s, v) => s + v, 0)), icon: TrendingUp, color: "text-emerald-500", info: "The sum of all installs across the analyzed apps." },
                 ].map((card) => (
-                  <div key={card.label} className="rounded-3xl bg-white p-5 shadow-sm">
+                  <div key={card.label} className="rounded-3xl bg-white p-5 shadow-sm relative group/card">
                     <div className={`h-10 w-10 rounded-2xl bg-slate-50 flex items-center justify-center ${card.color}`}>
                       <card.icon size={18} />
                     </div>
@@ -885,7 +895,7 @@ export default function App() {
               </section>
 
               <section className="mt-8 grid grid-cols-1 gap-5 xl:grid-cols-3">
-                <Card title="Top-K Apps" icon={ListChecks}>
+                <Card title="Top-K Apps" icon={ListChecks} info="Shows the top 5 apps sorted by reviews, ratings, and total installs.">
                   <div className="space-y-4">
                     {[
                       { title: "Top Reviews", list: topK.reviews, key: "reviews" },
@@ -926,8 +936,8 @@ export default function App() {
                       <BarChart data={groupStats}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
                         <XAxis dataKey="key" tick={{ fontSize: 10 }} />
-                        <YAxis />
-                        <Tooltip />
+                        <YAxis tickFormatter={formatNumber} tick={{ fontSize: 10 }} width={60} />
+                        <Tooltip formatter={(value, name) => [formatNumber(value), name === "totalInstalls" ? "Total Installs" : name]} />
                         <Bar dataKey="totalInstalls" fill={THEME.accent} radius={[10, 10, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
@@ -943,7 +953,7 @@ export default function App() {
                   </div>
                 </Card>
 
-                <Card title="Data Health" icon={CheckCircle2}>
+                <Card title="Data Health" icon={CheckCircle2} info="Monitors the completeness and loading status of the dataset.">
                   <div className="space-y-4 text-sm text-slate-600">
                     <div className="rounded-2xl bg-slate-50 p-4">
                       <p className="font-semibold text-slate-700">Coverage</p>
@@ -965,17 +975,18 @@ export default function App() {
 
           {activeSection === "Distributions" && (
             <section className="mt-8 grid grid-cols-1 gap-5 xl:grid-cols-3">
-              <Card title="Distribution Analysis" icon={ChartBar}>
+              <Card title="Distribution Analysis" icon={ChartBar} info="Area charts displaying the distribution, skewness (asymmetry), and kurtosis (tailedness) for ratings, reviews, and installs.">
                 <div className="space-y-4">
                   {["rating", "reviews", "installs"].map((key) => (
                     <div key={key} className="rounded-2xl bg-slate-50 p-3">
-                      <div className="flex items-center justify-between text-xs text-slate-500">
-                        <span className="uppercase tracking-wide">{key}</span>
+                      <div className="flex items-center justify-between text-xs text-slate-500 mb-2">
+                        <span className="uppercase tracking-wide font-semibold text-slate-700">{key === "rating" ? key : `Log10 ${key}`}</span>
                         <span>Skew {distribution[key].skew.toFixed(2)} | Kurt {distribution[key].kurt.toFixed(2)}</span>
                       </div>
                       <div className="h-24">
                         <ResponsiveContainer>
                           <AreaChart data={distribution[key].hist}>
+                            <XAxis dataKey="name" tick={{ fontSize: 10 }} />
                             <defs>
                               <linearGradient id={`grad-${key}`} x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="0%" stopColor={THEME.accent} stopOpacity={0.6} />
@@ -992,7 +1003,7 @@ export default function App() {
                 </div>
               </Card>
 
-              <Card title="Density & Violin" icon={LineIcon}>
+              <Card title="Density & Violin" icon={LineIcon} info="Visualizes the probability density of app ratings, helping identify where most ratings are concentrated.">
                 <div className="space-y-6">
                   <div>
                     <p className="text-xs text-slate-500 mb-2">Rating Density</p>
@@ -1014,10 +1025,10 @@ export default function App() {
                 </div>
               </Card>
 
-              <Card title="Visualization Suite" icon={ChartBar}>
+              <Card title="Visualization Suite" icon={ChartBar} info="Additional histograms and density curves for app installs and reviews to spot common ranges.">
                 <div className="grid grid-cols-1 gap-4">
                   <div className="rounded-2xl bg-slate-50 p-3">
-                    <p className="text-xs text-slate-500 mb-2">Installs Histogram</p>
+                    <p className="text-xs text-slate-500 mb-2">Installs Histogram (Log10)</p>
                     <div className="h-32">
                       <ResponsiveContainer>
                         <BarChart data={distribution.installs.hist}>
@@ -1028,7 +1039,7 @@ export default function App() {
                     </div>
                   </div>
                   <div className="rounded-2xl bg-slate-50 p-3">
-                    <p className="text-xs text-slate-500 mb-2">Reviews Density</p>
+                    <p className="text-xs text-slate-500 mb-2">Reviews Density (Log10)</p>
                     <div className="h-32">
                       <ResponsiveContainer>
                         <LineChart data={distribution.reviews.density}>
@@ -1073,12 +1084,12 @@ export default function App() {
                 </div>
               </Card>
 
-              <Card title="Scatter & Boxplot" icon={ChartBar}>
+              <Card title="Scatter & Boxplot" icon={ChartBar} info="A scatter plot of reviews vs rating to identify trends, alongside quartiles (Q1, Median, Q3) for the top 4 app categories.">
                 <div className="h-52">
                   <ResponsiveContainer>
                     <ScatterChart>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="reviews" name="log Reviews" />
+                      <XAxis dataKey="reviews" name="log Reviews" tickFormatter={(v) => v.toFixed(1)} tick={{ fontSize: 10 }} />
                       <YAxis dataKey="rating" name="Rating" />
                       <Tooltip />
                       <Scatter data={scatterData} fill={THEME.accent2} />
@@ -1107,7 +1118,7 @@ export default function App() {
 
           {activeSection === "Regression" && (
             <section className="mt-8 grid grid-cols-1 gap-5 xl:grid-cols-2">
-              <Card title="Regression Insights" icon={Target}>
+              <Card title="Regression Insights" icon={Target} info="A linear model predicting app rating based on reviews, installs, type (Paid), and content rating. The coefficients (beta) show the expected change in rating per unit increase.">
                 {regression ? (
                   <div className="space-y-3 text-sm text-slate-600">
                     <p className="font-semibold text-slate-700">Model: Rating ~ log(Reviews) + log(Installs) + Paid + Content Rating</p>
@@ -1127,13 +1138,26 @@ export default function App() {
 
           {activeSection === "Outliers" && (
             <section className="mt-8 grid grid-cols-1 gap-5 xl:grid-cols-2">
-              <Card title="Outlier Detection" icon={AlertTriangle}>
+              <Card title="Outlier Detection" icon={AlertTriangle} info="Highlights apps with unusually high or low reviews, installs, or ratings compared to the rest of the dataset.">
                 <div className="space-y-3 text-sm text-slate-600">
+                  <p className="text-xs text-slate-600 mb-3 bg-blue-50/50 p-3 rounded-xl border border-blue-100/50">
+                    <strong>Z-Score (σ)</strong> indicates how many standard deviations a value is from the average.
+                    A score of +3.0 means the app has exceptionally high numbers compared to the mean.
+                  </p>
                   {outliers.length ? (
                     outliers.map((row) => (
-                      <div key={row.app} className="flex items-center justify-between">
-                        <span className="text-slate-700">{row.app}</span>
-                        <span className="text-xs text-slate-500">zRev {row.zReview.toFixed(1)} | zInst {row.zInstall.toFixed(1)}</span>
+                      <div key={row.app} className="flex items-center justify-between border-b border-slate-50 pb-3 mb-3 last:border-0 last:pb-0 last:mb-0">
+                        <span className="text-slate-700 font-medium truncate pr-4">{row.app}</span>
+                        <div className="text-right whitespace-nowrap">
+                          <div className="text-xs font-semibold text-slate-700">
+                            <span className="text-slate-400 font-normal mr-1">Reviews</span>
+                            {row.zReview > 0 ? '+' : ''}{row.zReview.toFixed(1)}σ
+                          </div>
+                          <div className="text-xs text-slate-600 mt-0.5">
+                            <span className="text-slate-400 font-normal mr-1">Installs</span>
+                            {row.zInstall > 0 ? '+' : ''}{row.zInstall.toFixed(1)}σ
+                          </div>
+                        </div>
                       </div>
                     ))
                   ) : (
@@ -1146,12 +1170,12 @@ export default function App() {
 
           {activeSection === "Segmentation" && (
             <section className="mt-8 grid grid-cols-1 gap-5 xl:grid-cols-2">
-              <Card title="Segmentation (K-Means)" icon={Boxes}>
+              <Card title="Segmentation (K-Means)" icon={Boxes} info="Groups apps into 3 clusters based on similarities in their ratings, reviews, and installs to reveal distinct segments.">
                 <div className="h-52">
                   <ResponsiveContainer>
                     <ScatterChart>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="x" name="log Reviews" />
+                      <XAxis dataKey="x" name="log Reviews" tickFormatter={(v) => v.toFixed(1)} tick={{ fontSize: 10 }} />
                       <YAxis dataKey="y" name="Rating" />
                       <Tooltip />
                       <Scatter data={clusterScatter}>
@@ -1174,7 +1198,7 @@ export default function App() {
 
           {activeSection === "Hypothesis" && (
             <section className="mt-8 grid grid-cols-1 gap-5 xl:grid-cols-2">
-              <Card title="Hypothesis Tests" icon={FlaskConical}>
+              <Card title="Hypothesis Tests" icon={FlaskConical} info="Statistical tests to check if rating differences are significant (p-value < 0.05), and if App Type depends on Content Rating.">
                 <div className="space-y-3 text-sm text-slate-600">
                   <div>
                     <p className="font-semibold text-slate-700">T-test (Free vs Paid Ratings)</p>
@@ -1191,7 +1215,7 @@ export default function App() {
                 </div>
               </Card>
 
-              <Card title="Bootstrapping & CIs" icon={RefreshCw}>
+              <Card title="Bootstrapping & CIs" icon={RefreshCw} info="Estimates the true average and median ratings of the entire population using random resampling (95% confidence intervals).">
                 <div className="space-y-4 text-sm text-slate-600">
                   <div>
                     <p className="font-semibold text-slate-700">Mean Rating (95% CI)</p>
@@ -1208,7 +1232,7 @@ export default function App() {
 
           {activeSection === "A/B" && (
             <section className="mt-8 grid grid-cols-1 gap-5 xl:grid-cols-2">
-              <Card title="A/B Style Comparison" icon={Gauge}>
+              <Card title="A/B Style Comparison" icon={Gauge} info="Directly compares Free and Paid apps by looking at their average rating difference and installs ratio.">
                 <div className="space-y-3 text-sm text-slate-600">
                   <div className="rounded-xl bg-slate-50 p-3">
                     <p className="font-semibold text-slate-700">Free vs Paid</p>
@@ -1225,7 +1249,7 @@ export default function App() {
 
           {activeSection === "Composite" && (
             <section className="mt-8 grid grid-cols-1 gap-5 xl:grid-cols-3">
-              <Card title="Composite Score" icon={Sparkles}>
+              <Card title="Composite Score" icon={Sparkles} info="Ranks apps using a custom weighted score combining normalized ratings (40%), reviews (30%), and installs (30%).">
                 <div className="space-y-3 text-sm text-slate-600">
                   {composite.map((row, i) => (
                     <div key={row.app} className="flex items-center justify-between">
@@ -1236,12 +1260,12 @@ export default function App() {
                 </div>
               </Card>
 
-              <Card title="Performance Heat" icon={Brain}>
+              <Card title="Performance Heat" icon={Brain} info="Displays the average number of reviews across different app groups to highlight which areas attract the most feedback.">
                 <div className="h-52">
                   <ResponsiveContainer>
                     <BarChart data={groupStats} layout="vertical">
                       <XAxis type="number" hide />
-                      <YAxis dataKey="key" type="category" width={80} />
+                      <YAxis dataKey="key" type="category" width={110} tick={{ fontSize: 10 }} />
                       <Tooltip />
                       <Bar dataKey="avgReviews" fill={THEME.blue} radius={[0, 10, 10, 0]} />
                     </BarChart>
