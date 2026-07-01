@@ -126,7 +126,3 @@ If column names differ, rename them in your CSV to match the above headers so th
 
 - If the dashboard shows only a few rows or mock data, confirm `googleplaystore.csv` exists in the `public/` folder and that the file contains the expected headers.
 - If charts are empty, check that numeric columns (`Rating`, `Reviews`, `Installs`) are numeric and don't contain text or stray characters.
-
----
-
-If you'd like, I can also add inline tooltips for specific controls or create a printed-exportable one-page guide inside the app. Want me to add that next?
